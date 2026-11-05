@@ -1,13 +1,11 @@
-name: Auto Deploy to ECS
+name: 🚀 Auto Deploy to ECS
 
-# 触发条件：每当向 main 分支 push 代码，或在 GitHub 网页手动点击触发时运行
 on:
   push:
     branches:
       - main
-  workflow_dispatch: # 允许在 GitHub Actions 页面手动点击 "Run workflow" 一键重发
+  workflow_dispatch:
 
-# 并发控制：如果短时间内连续 push 多次，自动取消正在排队的老任务，只跑最新的一次
 concurrency:
   group: deploy-production
   cancel-in-progress: true
@@ -17,38 +15,18 @@ jobs:
     name: Build & Sync to ~/var/www
     runs-on: ubuntu-latest
     steps:
-      - name: 1. 检出最新仓库代码
+      - name: 📥 1. 检出最新仓库代码
         uses: actions/checkout@v4
 
-      # =========================================================================
-      # 【可选步骤】如果你的项目是纯 HTML/CSS/JS（无需 npm build），请保持下方注释状态；
-      # 如果使用了 Vite / Vue / React / Tailwind CLI 等构建工具，取消下面两段的注释即可：
-      # =========================================================================
-      # - name: 2. 配置 Node.js 环境并开启依赖缓存
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: '20'
-      #     cache: 'npm'
-      #
-      # - name: 3. 在 GitHub 云端容器内编译打包 (不消耗 ECS 内存)
-      #   run: |
-      #     npm ci
-      #     npm run build
-
-      - name: 4. 配置 SSH 免密通道与指纹授信
+      - name: 🔐 4. 配置 SSH 免密通道与指纹授信
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.ECS_SSH_KEY }}" > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          # 自动扫描 ECS 指纹写入 known_hosts，避免首次连接弹出 yes/no 确认导致卡死
           ssh-keyscan -p 22 -H ${{ secrets.ECS_HOST }} >> ~/.ssh/known_hosts
 
       - name: ⚡ 5. 通过 Rsync 增量同步至 ECS ~/var/www
         run: |
-          # 注意：
-          # 1. 如果启用了 npm run build，请将倒数第二行的 "./" 改为 "./dist/"
-          # 2. --delete 会自动清理你在本地已经删除的废弃旧文件
-          # 3. --chmod 确保上传后的文件 Nginx 拥有标准读取权限
           rsync -avz --delete \
             --chmod=D755,F644 \
             --exclude='.git/' \
@@ -59,11 +37,9 @@ jobs:
             -e "ssh -i ~/.ssh/id_ed25519 -p 22" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:~/var/www/
 
-      - name: 6. 远端权限兜底校验与后置钩子
+      - name: 🩺 6. 远端权限兜底校验与后置钩子
         run: |
           ssh -i ~/.ssh/id_ed25519 -p 22 ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} << 'EOF'
             echo "文件同步完成，当前 ~/var/www 目录文件列表："
             ls -lh ~/var/www
-            # 如果后续你有 FastAPI 等后端服务，也可在此处顺带触发重启：
-            # sudo systemctl restart my-backend.service
           EOF
