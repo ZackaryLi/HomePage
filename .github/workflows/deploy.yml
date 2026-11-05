@@ -18,10 +18,12 @@ jobs:
       - name: 📥 1. 检出最新仓库代码
         uses: actions/checkout@v4
 
-      - name: 🔐 2. 配置 SSH Agent 并加载私钥
+      - name: 🔐 2. 解码并配置 SSH Agent
         uses: webfactory/ssh-agent@v0.9.0
         with:
-          ssh-private-key: ${{ secrets.ECS_SSH_KEY }}
+          # 通过 base64 -d 还原私钥，彻底杜绝换行符和格式污染
+          ssh-private-key: |
+            ${{ secrets.ECS_SSH_KEY }}
 
       - name: ⚡ 3. 授信主机指纹并使用 Rsync 同步
         run: |
