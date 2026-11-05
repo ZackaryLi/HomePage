@@ -12,21 +12,24 @@ concurrency:
 
 jobs:
   deploy:
-    name: Build & Sync to ~/var/www
+    name: Sync to ~/var/www via SSH Agent
     runs-on: ubuntu-latest
     steps:
       - name: 📥 1. 检出最新仓库代码
         uses: actions/checkout@v4
 
-      - name: 🔐 4. 配置 SSH 免密通道与指纹授信
+      - name: 🔐 2. 配置 SSH Agent 并加载私钥
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.ECS_SSH_KEY }}
+
+      - name: ⚡ 3. 授信主机指纹并使用 Rsync 同步
         run: |
+          # 自动将 ECS 主机指纹写入 known_hosts，避免首次连接中断
           mkdir -p ~/.ssh
-          echo "${{ secrets.ECS_SSH_KEY }}" > ~/.ssh/id_ed25519
-          chmod 600 ~/.ssh/id_ed25519
           ssh-keyscan -p 22 -H ${{ secrets.ECS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: ⚡ 5. 通过 Rsync 增量同步至 ECS ~/var/www
-        run: |
+          # 执行 Rsync 增量同步（此时 ssh 会自动通过 ssh-agent 获取密钥，无需指定 -i）
           rsync -avz --delete \
             --chmod=D755,F644 \
             --exclude='.git/' \
@@ -34,12 +37,8 @@ jobs:
             --exclude='.gitignore' \
             --exclude='README.md' \
             --exclude='node_modules/' \
-            -e "ssh -i ~/.ssh/id_ed25519 -p 22" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:~/var/www/
 
-      - name: 🩺 6. 远端权限兜底校验与后置钩子
+      - name: 🩺 4. 远端校验
         run: |
-          ssh -i ~/.ssh/id_ed25519 -p 22 ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} << 'EOF'
-            echo "文件同步完成，当前 ~/var/www 目录文件列表："
-            ls -lh ~/var/www
-          EOF
+          ssh -p 22 ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} "echo '✅ 部署成功，当前文件列表：' && ls -lh ~/var/www"
