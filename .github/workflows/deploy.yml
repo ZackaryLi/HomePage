@@ -30,10 +30,10 @@ jobs:
       #     node-version: '20'
       #     cache: 'npm'
       #
-      - name: 3. 在 GitHub 云端容器内编译打包 (不消耗 ECS 内存)
-        run: |
-          npm ci
-          npm run build
+      # - name: 3. 在 GitHub 云端容器内编译打包 (不消耗 ECS 内存)
+      #   run: |
+      #     npm ci
+      #     npm run build
 
       - name: 4. 配置 SSH 免密通道与指纹授信
         run: |

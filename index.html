@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小猪的小窝</title>
+    <style>
+        /* 基础重置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f5f7fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            padding: 40px 20px;
+        }
+
+        /* 页面标题 */
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+
+        /* 照片墙容器：使用 CSS 多列布局实现瀑布流 */
+        .photo-gallery {
+            max-width: 1200px;
+            margin: 0 auto;
+            column-count: 4; /* 默认4列 */
+            column-gap: 20px; /* 列间距 */
+        }
+
+        /* 单个照片卡片 */
+        .photo-item {
+            break-inside: avoid; /* 防止图片被截断到下一列 */
+            margin-bottom: 20px; /* 行间距 */
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            background-color: #fff;
+        }
+
+        /* 图片样式 */
+        .photo-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease; /* 平滑放大动画 */
+        }
+
+        /* 悬浮时的遮罩层 */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to top, rgba(0,0,0,0.7) 0%, rgba(0,0,0,0) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            padding: 20px;
+            color: white;
+        }
+
+        /* 遮罩层文字 */
+        .overlay h3 {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            transform: translateY(20px);
+            transition: transform 0.4s ease;
+        }
+
+        .overlay p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            transform: translateY(20px);
+            transition: transform 0.4s ease 0.1s; /* 稍微延迟，增加层次感 */
+        }
+
+        /* 鼠标悬浮特效 */
+        .photo-item:hover img {
+            transform: scale(1.08); /* 图片缓慢放大 */
+        }
+        .photo-item:hover .overlay {
+            opacity: 1; /* 显示遮罩层 */
+        }
+        .photo-item:hover .overlay h3,
+        .photo-item:hover .overlay p {
+            transform: translateY(0); /* 文字向上滑入 */
+        }
+
+        /* 响应式设计：根据屏幕宽度调整列数 */
+        @media (max-width: 992px) {
+            .photo-gallery {
+                column-count: 3;
+            }
+        }
+        @media (max-width: 768px) {
+            .photo-gallery {
+                column-count: 2;
+                column-gap: 15px;
+            }
+            .photo-item {
+                margin-bottom: 15px;
+            }
+        }
+        @media (max-width: 480px) {
+            .photo-gallery {
+                column-count: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>我可爱的小猪照片集</h1>
+        <p>我的小猪真的很可爱</p>
+    </div>
+
+    <div class="photo-gallery">
+        <!-- 照片 1 -->
+        <div class="photo-item">
+            <img src="images/image1.jpg" alt="板筋盖饭">
+            <div class="overlay">
+                <h3>小猪第一次请我吃板筋盖饭</h3>
+                <p>很好吃，有点油，但是我点了奶茶</p>
+            </div>
+        </div>
+
+        <!-- 照片 2 -->
+        <div class="photo-item">
+            <img src="https://images.unsplash.com/photo-1517486808906-6ca8b3f04846?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="复古相机">
+            <div class="overlay">
+                <h3>光影记录</h3>
+                <p>抓住稍纵即逝的瞬间</p>
+            </div>
+        </div>
+
+        <!-- 照片 3 (竖图测试瀑布流) -->
+        <div class="photo-item">
+            <img src="https://images.unsplash.com/photo-1524250502761-1ac6f2e30d43?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=900&q=80" alt="人像">
+            <div class="overlay">
+                <h3>城市漫步</h3>
+                <p>午后的阳光与街景</p>
+            </div>
+        </div>
+
+        <!-- 照片 4 -->
+        <div class="photo-item">
+            <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="科技">
+            <div class="overlay">
+                <h3>极简桌面</h3>
+                <p>保持专注与创造力</p>
+            </div>
+        </div>
+
+        <!-- 照片 5 -->
+        <div class="photo-item">
+            <img src="https://images.unsplash.com/photo-1469474968028-56623f02e42e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="徒步">
+            <div class="overlay">
+                <h3>林间小径</h3>
+                <p>去往未知的远方</p>
+            </div>
+        </div>
+
+        <!-- 照片 6 (竖图) -->
+        <div class="photo-item">
+            <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&h=800&q=80" alt="海滩">
+            <div class="overlay">
+                <h3>夏日海浪</h3>
+                <p>倾听海风的声音</p>
+            </div>
+        </div>
+
+        <!-- 照片 7 -->
+        <div class="photo-item">
+            <img src="https://images.unsplash.com/photo-1511512578047-dfb367046420?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="游戏">
+            <div class="overlay">
+                <h3>赛博之夜</h3>
+                <p>霓虹灯下的都市</p>
+            </div>
+        </div>
+
+        <!-- 照片 8 -->
+        <div class="photo-item">
+            <img src="https://images.unsplash.com/photo-1472214103451-9374bd1c798e?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80" alt="风景">
+            <div class="overlay">
+                <h3>晨雾迷漫</h3>
+                <p>破晓时的第一缕光</p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
