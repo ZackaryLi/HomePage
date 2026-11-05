@@ -35,9 +35,10 @@ jobs:
       - name: 🔐 4. 配置 SSH 密钥与主机指纹授信
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.ECS_SSH_KEY }}" > ~/.ssh/id_ed25519
+          # 关键修复：使用 tr -d '\r' 清理可能存在的 Windows 换行符，避免 libcrypto 解析崩溃
+          echo "${{ secrets.ECS_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          # 自动获取 ECS SSH 指纹写入 known_hosts，避免首次连接弹出交互提示卡死
+          # 自动获取 ECS SSH 指纹写入 known_hosts
           ssh-keyscan -p 22 -H ${{ secrets.ECS_HOST }} >> ~/.ssh/known_hosts
 
       - name: ⚡ 5. 通过 Rsync 增量同步至 /var/www/zipperli.com/
