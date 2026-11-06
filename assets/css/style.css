@@ -1,0 +1,691 @@
+/* ==========================================
+   全局样式表 - 小猪的小窝
+   视觉风格参考 HomePage-main：深色 + 玻璃拟态
+   ========================================== */
+
+/* ---------- CSS 变量 ---------- */
+:root {
+    --card-bg: rgba(255, 255, 255, 0.05);
+    --card-border: rgba(255, 255, 255, 0.18);
+    --text-color: #ffffff;
+    --text-muted: rgba(255, 255, 255, 0.65);
+    --accent-color: #74b9ff;
+    --radius-lg: 20px;
+    --radius-md: 14px;
+}
+
+/* ---------- 基础重置 ---------- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    min-height: 100vh;
+    color: var(--text-color);
+    overflow-x: hidden;
+    /* 深色渐变背景：无背景图数据，用纯渐变代替 */
+    background: linear-gradient(135deg, #1e2a3a 0%, #1a2332 50%, #141c28 100%);
+    background-attachment: fixed;
+    line-height: 1.6;
+}
+
+/* ---------- 整体布局：侧栏 + 内容区 ---------- */
+.main-container {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 30px;
+    padding: 30px;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: 100vh;
+    align-items: start;
+}
+
+/* ---------- 玻璃卡片通用样式 ---------- */
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+/* ---------- 左侧边栏 ---------- */
+.sidebar {
+    padding: 34px 28px;
+    position: sticky;
+    top: 30px;
+}
+
+/* 头像：暂无头像图片，用 emoji 圆形占位 */
+.profile-avatar {
+    width: 110px;
+    height: 110px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 3px solid rgba(255, 255, 255, 0.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.2rem;
+    user-select: none;
+}
+
+.profile-name {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 8px;
+}
+
+.profile-quote {
+    text-align: center;
+    font-size: 0.92rem;
+    color: var(--text-muted);
+}
+
+/* ---------- 社交链接按钮 ---------- */
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 18px;
+}
+
+.social-links a {
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-color);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+/* ---------- 右侧内容区 ---------- */
+.content-area {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    min-width: 0;
+}
+
+.content-section {
+    padding: 28px 30px;
+}
+
+.content-section h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.content-section h2 .section-icon {
+    font-size: 1.1rem;
+}
+
+/* ---------- 照片卡片网格 ---------- */
+.photo-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 20px;
+}
+
+.photo-item {
+    position: relative;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.06);
+    /* 入场动画 */
+    opacity: 0;
+    transform: translateY(20px);
+    animation: cardIn 0.6s ease-out forwards;
+}
+
+.photo-item img {
+    width: 100%;
+    height: auto;
+    display: block;
+    transition: transform 0.5s ease;
+}
+
+/* 悬浮遮罩 */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.75) 0%, rgba(0, 0, 0, 0) 60%);
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    padding: 18px;
+    color: #fff;
+}
+
+.overlay h3 {
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+    transform: translateY(15px);
+    transition: transform 0.4s ease;
+}
+
+.overlay p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    transform: translateY(15px);
+    transition: transform 0.4s ease 0.1s;
+}
+
+.photo-item:hover img {
+    transform: scale(1.06);
+}
+
+.photo-item:hover .overlay {
+    opacity: 1;
+}
+
+.photo-item:hover .overlay h3,
+.photo-item:hover .overlay p {
+    transform: translateY(0);
+}
+
+/* ---------- GitHub 贡献图 ---------- */
+.contribution-section h2 {
+    justify-content: space-between;
+}
+
+.contribution-title {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.github-icon {
+    flex-shrink: 0;
+}
+
+/* 标题行占位符（图例 + 数据源信息） */
+.contribution-header-placeholder {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.contribution-header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.contribution-chart {
+    position: relative;
+    overflow-x: auto;
+    min-height: 150px;
+}
+
+/* 加载占位符 */
+.loading-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 120px;
+    gap: 15px;
+    opacity: 0.7;
+}
+
+.loading-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-top: 3px solid var(--accent-color);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* 月份标签（grid 列由 JS 动态设置） */
+.month-labels {
+    margin-bottom: 8px;
+}
+
+.month-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    text-align: left;
+}
+
+/* 贡献格子网格 */
+.contribution-grid-container {
+    display: flex;
+    gap: 3px;
+}
+
+.week-labels {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    margin-right: 5px;
+    padding-top: 2px;
+}
+
+.week-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    height: 14px;
+    line-height: 14px;
+    text-align: right;
+    width: 18px;
+}
+
+.contribution-grid {
+    display: grid;
+    grid-template-rows: repeat(7, 14px);
+    gap: 3px;
+    grid-auto-flow: column;
+    /* grid-template-columns 由 JS 动态设置 */
+}
+
+.contribution-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.2s ease;
+    animation: cellFadeIn 0.6s ease-out forwards;
+    opacity: 0;
+    transform: scale(0.8);
+}
+
+@keyframes cellFadeIn {
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* 五级贡献颜色（与 --accent-color 同色系蓝） */
+.contribution-cell.level-0 {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contribution-cell.level-1 {
+    background: rgba(116, 185, 255, 0.3);
+    border: 1px solid rgba(116, 185, 255, 0.4);
+}
+
+.contribution-cell.level-2 {
+    background: rgba(116, 185, 255, 0.5);
+    border: 1px solid rgba(116, 185, 255, 0.6);
+}
+
+.contribution-cell.level-3 {
+    background: rgba(116, 185, 255, 0.7);
+    border: 1px solid rgba(116, 185, 255, 0.8);
+}
+
+.contribution-cell.level-4 {
+    background: var(--accent-color);
+    border: 1px solid #5ca3ff;
+    box-shadow: 0 0 8px rgba(116, 185, 255, 0.3);
+}
+
+.contribution-cell:hover {
+    transform: scale(1.3);
+    z-index: 10;
+    border-width: 2px;
+    filter: brightness(1.2);
+    box-shadow: 0 0 10px rgba(116, 185, 255, 0.5);
+}
+
+/* 图例 */
+.contribution-legend {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.legend-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin: 0 5px;
+}
+
+.legend-cell {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+
+.legend-cell.level-0 {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.legend-cell.level-1 {
+    background: rgba(116, 185, 255, 0.3);
+    border: 1px solid rgba(116, 185, 255, 0.4);
+}
+
+.legend-cell.level-2 {
+    background: rgba(116, 185, 255, 0.5);
+    border: 1px solid rgba(116, 185, 255, 0.6);
+}
+
+.legend-cell.level-3 {
+    background: rgba(116, 185, 255, 0.7);
+    border: 1px solid rgba(116, 185, 255, 0.8);
+}
+
+.legend-cell.level-4 {
+    background: var(--accent-color);
+    border: 1px solid #5ca3ff;
+}
+
+/* 工具提示 */
+.contribution-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(10px);
+    color: white;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    pointer-events: none;
+    z-index: 1000;
+    transform: translateX(-50%) translateY(-100%);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    white-space: nowrap;
+    max-width: 200px;
+}
+
+.contribution-tooltip.show {
+    opacity: 1;
+}
+
+.tooltip-date {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.tooltip-count {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+/* 数据源信息 */
+.contribution-source-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    opacity: 0.8;
+}
+
+.source-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.source-indicator.source-api {
+    background: #00b894;
+    box-shadow: 0 0 6px rgba(0, 184, 148, 0.4);
+}
+
+.source-indicator.source-unknown {
+    background: #636e72;
+}
+
+.source-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+}
+
+/* 统计摘要 */
+.contribution-summary {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.summary-item {
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.summary-number {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent-color);
+    line-height: 1;
+}
+
+.summary-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* 手机端统计信息（默认隐藏，移动端替代贡献图） */
+.mobile-contribution-stats {
+    display: none;
+}
+
+.mobile-stat-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.mobile-stat-number {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--accent-color);
+    line-height: 1;
+}
+
+.mobile-stat-label {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ---------- 页脚 ---------- */
+.site-footer {
+    text-align: center;
+    padding: 22px 20px;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+
+/* ---------- 动画 ---------- */
+@keyframes cardIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 768px) {
+    .main-container {
+        grid-template-columns: 1fr;
+        padding: 20px;
+        gap: 20px;
+    }
+
+    /* 移动端侧栏取消吸顶，改为普通流式布局 */
+    .sidebar {
+        position: static;
+        padding: 28px 22px;
+    }
+
+    .photo-grid {
+        grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+        gap: 14px;
+    }
+
+    /* 手机端隐藏贡献图，显示统计数据 */
+    .contribution-chart {
+        display: none;
+    }
+
+    .mobile-contribution-stats {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 15px;
+        margin-top: 10px;
+        padding: 15px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .contribution-header-placeholder {
+        flex-direction: column;
+        align-items: stretch;
+        justify-content: flex-start;
+    }
+
+    .contribution-header-placeholder .contribution-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+
+    .contribution-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .summary-number {
+        font-size: 16px;
+    }
+
+    .summary-label {
+        font-size: 10px;
+    }
+
+    .contribution-grid {
+        grid-template-rows: repeat(7, 11px);
+        gap: 2px;
+    }
+
+    .contribution-cell {
+        width: 11px;
+        height: 11px;
+        border-radius: 2px;
+    }
+
+    .week-label {
+        width: 15px;
+        height: 11px;
+        line-height: 11px;
+        font-size: 9px;
+    }
+
+    .legend-cell {
+        width: 11px;
+        height: 11px;
+    }
+
+    .contribution-tooltip {
+        font-size: 11px;
+        padding: 6px 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .mobile-contribution-stats {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 12px;
+    }
+
+    .mobile-stat-number {
+        font-size: 14px;
+    }
+
+    .mobile-stat-label {
+        font-size: 9px;
+    }
+
+    .legend-label {
+        font-size: 9px;
+        margin: 0 2px;
+    }
+
+    .legend-cell {
+        width: 10px;
+        height: 10px;
+    }
+
+    .contribution-source-info {
+        font-size: 10px;
+    }
+
+    .contribution-summary {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+        padding: 10px;
+    }
+
+    .summary-number {
+        font-size: 14px;
+    }
+
+    .summary-label {
+        font-size: 9px;
+    }
+}
