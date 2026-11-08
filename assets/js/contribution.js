@@ -95,6 +95,22 @@ function getContributionLevel(count) {
     return 4;
 }
 
+// 按容器宽度截断周数据：超出时从最早（左侧）的周开始截去，保证图以"今天"结尾且不出现横向滚动条
+function truncateWeeksToWidth(weeklyData, container) {
+    if (!container || !weeklyData.length) return weeklyData;
+
+    const isSmallMobile = window.innerWidth <= 480;
+    const cellSize = isSmallMobile ? 9 : 14;
+    const gap = 3;
+    const weekLabelWidth = (isSmallMobile ? 15 : 18) + 5; // 星期标签列宽 + 右间距
+
+    const available = container.clientWidth - weekLabelWidth;
+    if (available <= 0) return weeklyData;
+
+    const maxWeeks = Math.max(10, Math.floor((available + gap) / (cellSize + gap)));
+    return weeklyData.length > maxWeeks ? weeklyData.slice(-maxWeeks) : weeklyData;
+}
+
 // 按周组织贡献数据 - GitHub风格
 function organizeDataByWeeks(contributions) {
     // 创建日期映射以便快速查找
@@ -157,18 +173,26 @@ function organizeDataByWeeks(contributions) {
     return weeks;
 }
 
+// 最近一次渲染的数据，供窗口尺寸变化时重算截断
+let lastContributions = null;
+let lastDataSource = 'unknown';
+let resizeTimer = null;
+
 // 更新贡献图表
 function updateContributionChart(contributions, dataSource = 'unknown') {
     const chartContainer = document.getElementById('contribution-chart');
     if (!chartContainer) return;
+
+    lastContributions = contributions;
+    lastDataSource = dataSource;
 
     // 检测是否为移动设备
     const isMobile = window.innerWidth <= 768;
 
     chartContainer.innerHTML = '';
 
-    // 按周组织数据 - GitHub风格
-    const weeklyData = organizeDataByWeeks(contributions);
+    // 按周组织数据，并按容器宽度截断（保留最近的周）
+    const weeklyData = truncateWeeksToWidth(organizeDataByWeeks(contributions), chartContainer);
 
     // 将标题行内容移到标题占位符中
     const headerPlaceholder = document.getElementById('contribution-header-placeholder');
@@ -240,6 +264,12 @@ function updateContributionChart(contributions, dataSource = 'unknown') {
             cell.addEventListener('mouseleave', function() {
                 this.style.transform = 'scale(1)';
                 this.style.zIndex = '1';
+                // 鼠标移开：取消未触发的显示延时，并隐藏已显示的工具提示
+                if (tooltipTimeout) {
+                    clearTimeout(tooltipTimeout);
+                    tooltipTimeout = null;
+                }
+                hideAllTooltips();
             });
 
             grid.appendChild(cell);
@@ -525,6 +555,15 @@ function formatTooltipDate(dateString) {
 // 初始化
 document.addEventListener('DOMContentLoaded', function() {
     fetchGitHubContributions(GITHUB_USERNAME);
+
+    // 窗口尺寸变化时重算截断（防抖），跨过 768px 断点时也会切换桌面/移动布局
+    window.addEventListener('resize', function() {
+        if (!lastContributions) return;
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            updateContributionChart(lastContributions, lastDataSource);
+        }, 200);
+    });
 
     // 点击非贡献格子区域时隐藏工具提示
     document.addEventListener('click', function(e) {

@@ -222,7 +222,9 @@ body {
     gap: 8px;
 }
 
-.github-icon {
+.github-icon,
+.bilibili-icon,
+.email-icon {
     flex-shrink: 0;
 }
 
@@ -242,7 +244,7 @@ body {
 
 .contribution-chart {
     position: relative;
-    overflow-x: auto;
+    overflow: hidden; /* 周数由 JS 按容器宽度截断，禁用横向滚动条 */
     min-height: 150px;
 }
 
