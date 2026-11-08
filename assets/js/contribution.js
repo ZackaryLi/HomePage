@@ -384,7 +384,7 @@ function createMonthLabels(weeklyData) {
         return monthsContainer;
     }
 
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthPositions = [];
 
     // 计算每个月份在网格中的位置
@@ -440,7 +440,7 @@ function createWeekLabels() {
     const weekContainer = document.createElement('div');
     weekContainer.className = 'week-labels';
 
-    const days = ['', '周一', '', '周三', '', '周五', ''];
+    const days = ['', 'Mon', '', 'Wed', '', 'Fri', ''];
     days.forEach(day => {
         const dayLabel = document.createElement('span');
         dayLabel.className = 'week-label';
@@ -545,11 +545,11 @@ function hideAllTooltips() {
     });
 }
 
-// 格式化工具提示日期
+// 格式化工具提示日期（GitHub 风格：Nov 8, 2026）
 function formatTooltipDate(dateString) {
     const date = new Date(dateString);
-    const months = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
-    return `${date.getFullYear()}年${months[date.getMonth()]}${date.getDate()}日`;
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return `${months[date.getMonth()]} ${date.getDate()}, ${date.getFullYear()}`;
 }
 
 // 初始化

@@ -12,6 +12,9 @@
     --accent-color: #74b9ff;
     --radius-lg: 20px;
     --radius-md: 14px;
+    /* 背景参数：换图改 background-image；想更清晰调低 --bg-blur，想更暗加深 --bg-tint */
+    --bg-tint: rgba(0, 0, 0, 0.19);
+    --bg-blur: 19px;
 }
 
 /* ---------- 基础重置 ---------- */
@@ -26,10 +29,25 @@ body {
     min-height: 100vh;
     color: var(--text-color);
     overflow-x: hidden;
-    /* 深色渐变背景：无背景图数据，用纯渐变代替 */
-    background: linear-gradient(135deg, #1e2a3a 0%, #1a2332 50%, #141c28 100%);
+    /* 背景：图片在上，深色渐变垫底（图片加载前/失败时兜底） */
+    background-image: url('../img/background.jpg'),
+        linear-gradient(135deg, #1e2a3a 0%, #1a2332 50%, #141c28 100%);
+    background-size: cover;
+    background-position: center;
     background-attachment: fixed;
     line-height: 1.6;
+}
+
+/* 全屏模糊压暗层（zyyo 风格：背景整体模糊 + 轻微黑色遮罩） */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: var(--bg-tint);
+    backdrop-filter: blur(var(--bg-blur));
+    -webkit-backdrop-filter: blur(var(--bg-blur));
+    z-index: -1;
+    pointer-events: none;
 }
 
 /* ---------- 整体布局：侧栏 + 内容区 ---------- */
@@ -224,7 +242,8 @@ body {
 
 .github-icon,
 .bilibili-icon,
-.email-icon {
+.email-icon,
+.section-icon {
     flex-shrink: 0;
 }
 
@@ -536,6 +555,42 @@ body {
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+}
+
+/* ---------- 站点 / 项目卡片网格 ---------- */
+.card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+.card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px;
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--card-border);
+    text-decoration: none;
+    color: var(--text-color);
+    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+}
+
+.card-title {
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.card-desc {
+    font-size: 0.85rem;
+    color: var(--text-muted);
 }
 
 /* ---------- 页脚 ---------- */
