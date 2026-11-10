@@ -102,7 +102,7 @@ function truncateWeeksToWidth(weeklyData, container) {
     const isSmallMobile = window.innerWidth <= 480;
     const cellSize = isSmallMobile ? 9 : 14;
     const gap = 3;
-    const weekLabelWidth = (isSmallMobile ? 15 : 18) + 5; // 星期标签列宽 + 右间距
+    const weekLabelWidth = (isSmallMobile ? 15 : 18) + gap; // 星期标签列宽 + flex 间距（与 CSS 对齐注释同步）
 
     const available = container.clientWidth - weekLabelWidth;
     if (available <= 0) return weeklyData;
@@ -408,7 +408,8 @@ function createMonthLabels(weeklyData) {
     // 创建月份标签容器，宽度与网格对应
     const isSmallMobile = window.innerWidth <= 480;
     const cellSize = isSmallMobile ? '9px' : '14px';
-    const labelSize = isSmallMobile ? '18px' : '22px';
+    // 占位列宽 = .week-label 列宽（见 style.css .week-labels 对齐注释）
+    const labelSize = isSmallMobile ? '15px' : '18px';
 
     monthsContainer.style.display = 'grid';
     monthsContainer.style.gridTemplateColumns = `${labelSize} repeat(${weeklyData.length}, ${cellSize})`;
