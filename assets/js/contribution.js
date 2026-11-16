@@ -387,20 +387,18 @@ function createMonthLabels(weeklyData) {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     const monthPositions = [];
 
-    // 计算每个月份在网格中的位置
+    // 计算每个月份标签的位置：贴在"包含当月 1 日"的那一列（与 GitHub 一致；
+    // 旧逻辑"该周首日≤7号"会把标签放偏后一周，与真实月初错位）
     weeklyData.forEach((week, weekIndex) => {
-        if (week.length > 0) {
-            const firstDayOfWeek = new Date(week[0].date);
-            const month = firstDayOfWeek.getMonth();
-            const day = firstDayOfWeek.getDate();
-
-            // 如果是月初的前几天，显示月份标签
-            if (day <= 7 && !monthPositions.find(m => m.month === month)) {
+        for (const day of week) {
+            const [, month, dayOfMonth] = day.date.split('-').map(Number);
+            if (dayOfMonth === 1 && !monthPositions.find(m => m.month === month - 1)) {
                 monthPositions.push({
-                    month: month,
+                    month: month - 1,
                     weekIndex: weekIndex,
-                    label: months[month]
+                    label: months[month - 1]
                 });
+                break;
             }
         }
     });
