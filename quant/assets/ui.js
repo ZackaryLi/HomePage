@@ -51,7 +51,8 @@
             links.get(visible[0].target)?.setAttribute('aria-current', 'location');
         }, { rootMargin: '-5% 0px -65% 0px' });
         headings.forEach(heading => headingObserver.observe(heading));
-        document.querySelector('.paper-end').hidden = !article.querySelector('h1,h2,h3,p,pre');
+        const paperEnd = document.querySelector('.paper-end');
+        if (paperEnd) paperEnd.hidden = !article.querySelector('h1,h2,h3,p,pre');
         updateProgress();
     };
     new MutationObserver(buildContents).observe(article, { childList: true });

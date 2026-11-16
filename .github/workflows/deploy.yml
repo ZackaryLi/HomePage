@@ -57,19 +57,15 @@ jobs:
           curl -sf --max-time 30 -H "X-API-Key: ${QUANT_API_KEY}" \
             "$BASE/benchmarks" -o "quant/data/benchmarks.json" || QUANT_OK=0
           # 按 manifest 逐日拉取历史报告正文（报告列表详情数据；单日失败仅跳过，不影响部署）
+          # 注意：curl -f 失败时 -o 仍会留下空文件，必须 rm 掉，否则会被下方 JSON 校验
+          # 判为非法 → QUANT_OK=0 → 整站量化数据被冻结（违背"单日失败仅跳过"的意图）
           for M in us cn; do
-            for D in $(python3 -c "
-import json
-try:
-    m = json.load(open('quant/data/manifest-$M.json'))
-    print(' '.join(r['date'] for r in m['data']['reports']))
-except Exception:
-    pass
-"); do
+            DATES=$(python3 -c "import json; m=json.load(open('quant/data/manifest-$M.json')); print(' '.join(r['date'] for r in m['data']['reports']))" 2>/dev/null || true)
+            for D in $DATES; do
               [ -f "quant/data/report-$M-$D.json" ] || \
               curl -sf --max-time 20 -H "X-API-Key: ${QUANT_API_KEY}" \
                 "$BASE/reports/$D?market=$M" -o "quant/data/report-$M-$D.json" \
-                || echo "::warning::report-$M-$D.json 拉取失败，该日期详情页将不可用"
+                || { rm -f "quant/data/report-$M-$D.json"; echo "::warning::report-$M-$D.json 拉取失败，该日期详情页将不可用"; }
             done
           done
           # 校验产物是合法 JSON（防止把网关错误页当成数据存下来）
@@ -77,8 +73,8 @@ except Exception:
             python3 -m json.tool "$f" > /dev/null || QUANT_OK=0
           done
           if [ "$QUANT_OK" != "1" ]; then
-            echo "QUANT_EXCLUDE=--exclude=quant/" >> "$GITHUB_ENV"
-            echo "::warning::量化数据拉取失败——本次部署保留服务器上的 quant/ 旧数据（宁旧勿无）"
+            echo "QUANT_EXCLUDE=--exclude=quant/data/" >> "$GITHUB_ENV"
+            echo "::warning::量化数据拉取失败——本次部署保留服务器上的 quant/data/ 旧数据（宁旧勿无；quant/ 页面代码仍正常更新）"
           else
             echo "✅ 量化数据拉取成功："
             ls -la quant/data/
@@ -88,7 +84,8 @@ except Exception:
         run: |
           # QUANT_EXCLUDE 正常为空：quant/（前端页面+刚生成的数据）随源目录同步，
           # --delete 自动清理服务器上的过期文件（含退役的旧HTML报告页）。
-          # 数据拉取失败时其为 --exclude=quant/：保护服务器旧数据不被删空。
+          # 数据拉取失败时其为 --exclude=quant/data/：只保护服务器旧数据不被删空，
+          # quant/ 的页面代码（html/assets）仍正常更新。
           rsync -avz --delete \
             --chmod=D755,F644 \
             --exclude='.git/' \
@@ -96,6 +93,10 @@ except Exception:
             --exclude='.gitignore' \
             --exclude='README.md' \
             --exclude='node_modules/' \
+            --exclude='*.md' \
+            --exclude='key.txt' \
+            --exclude='imgs/' \
+            --exclude='视频生成prompt.txt' \
             $QUANT_EXCLUDE \
             -e "ssh -i ~/.ssh/id_ed25519 -p 22" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/zipperli.com/
