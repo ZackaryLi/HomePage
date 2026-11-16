@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1019">
+    <title>量化报告 · ZipperLi</title>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="report-page">
+    <a class="skip-link" href="#report-body">跳转至报告正文</a>
+    <div class="reading-progress" aria-hidden="true"><span id="reading-progress-fill"></span></div>
+    <div class="quant-container">
+        <header class="site-header">
+            <a class="brand" href="./index.html" aria-label="ZipperLi 量化日报首页"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 17V11M12 17V5M19 17V8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span><span>ZipperLi<span class="brand-divider">/</span><span class="brand-product">Quant</span></span></a>
+            <nav class="site-nav" aria-label="主导航"><a href="./index.html">市场概览</a><a class="nav-active" href="./index.html#block-reports">报告归档</a><a href="../" class="home-link">个人主页 <span aria-hidden="true">↗</span></a></nav>
+        </header>
+        <main id="main-content">
+            <div class="breadcrumb"><a href="./index.html">量化日报</a><span aria-hidden="true">/</span><span>报告详情</span></div>
+            <header class="quant-header">
+                <div class="quant-title"><p class="eyebrow">DAILY RESEARCH / 每日研究</p><h1 id="report-title">量化报告</h1><p id="report-asof" class="data-asof" role="status">报告加载中…</p></div>
+                <a class="back-link" href="./index.html#block-reports"><span aria-hidden="true">←</span> 返回列表</a>
+            </header>
+            <div class="report-layout">
+                <section class="glass-card report-paper" aria-label="报告全文"><div class="paper-header"><span>研究报告<span class="paper-header-divider">/</span>MARKET RESEARCH</span><span>ZipperLi</span></div><article id="report-body" class="markdown-body"><div class="loading-state" role="status"><span class="loading-dot"></span>正在加载报告正文…</div></article><div class="paper-end"><span></span>报告结束<span></span></div></section>
+                <aside class="report-sidebar" aria-label="阅读辅助">
+                    <nav class="toc-card" aria-labelledby="toc-title"><p class="eyebrow">ON THIS PAGE</p><h2 id="toc-title">本篇目录</h2><ol id="report-toc"><li class="toc-placeholder">报告加载后显示目录</li></ol></nav>
+                    <div class="reading-tools"><button type="button" id="print-report"><span aria-hidden="true">↗</span> 打印 / 保存 PDF</button><a href="#main-content"><span aria-hidden="true">↑</span> 回到顶部</a></div>
+                    <p class="sidebar-note">以数据记录市场<br>以时间检验判断</p>
+                </aside>
+            </div>
+        </main>
+        <footer class="quant-footer"><div class="footer-row"><p><span class="footer-brand">ZipperLi / Quant</span>系统自动生成，仅为客观状态描述，不构成投资建议。</p><a href="../">返回主页 <span aria-hidden="true">↗</span></a></div></footer>
+    </div>
+    <noscript><p class="noscript-note">请启用 JavaScript 以加载报告正文。</p></noscript>
+    <script src="assets/marked.min.js"></script>
+    <script src="assets/report.js"></script>
+    <script src="assets/ui.js"></script>
+</body>
+</html>

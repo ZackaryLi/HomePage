@@ -1,14 +1,26 @@
+# 主站（zipperli.com）最终版部署 workflow —— 放入主站仓库 .github/workflows/
+#
+# 前置条件：
+#   1. 主站仓库 Secrets 添加 QUANT_API_KEY（值 = 量化系统 config.yml 的 api.key）
+#   2. 主站仓库包含 quant/index.html + quant/assets/（前端页面）
+#   3. 主站仓库 .gitignore 添加一行：quant/data/   （CI生成的数据不入库）
+#
+# 触发：push 到 main / 手动 / 每天定时两次（北京时间 08:35 美股、17:05 A股，各在报告生成后35分钟）
+
 name: 🚀 Deploy to ECS Production
 
 on:
   push:
     branches:
-      - main # 当推送到 main 分支时自动触发
-  workflow_dispatch: # 允许在 GitHub 网页端手动点击按钮一键触发
+      - main
+  workflow_dispatch: # 允许在 GitHub 网页端手动一键触发（数据兜底手段）
+  schedule:
+    - cron: '35 0 * * 1-6'   # UTC → 北京时间 周一~六 08:35（周六拉的是周五收盘的美股报告）
+    - cron: '5 9 * * 1-5'    # UTC → 北京时间 周一~五 17:05
 
 concurrency:
   group: deploy-production
-  cancel-in-progress: true # 如果有新提交，自动取消正在排队或运行中的老任务，只跑最新代码
+  cancel-in-progress: true # 有新提交时取消排队中的老任务，只跑最新代码
 
 jobs:
   deploy:
@@ -18,46 +30,81 @@ jobs:
       - name: 📥 1. 检出代码
         uses: actions/checkout@v4
 
-      # =========================================================================
-      # 【可选步骤】如果你的项目是纯静态 HTML/CSS/JS（无需编译），请保持下方注释状态；
-      # 如果使用了 Vite / Vue / React / Tailwind 等前端框架，取消下面几行的注释：
-      # =========================================================================
-      # - name: 🟢 2. 安装 Node.js 环境
-      #   uses: actions/setup-node@v4
-      #   with:
-      #     node-version: '20'
-      #     cache: 'npm'
-      # - name: 🔨 3. 执行前端项目打包
-      #   run: |
-      #     npm ci
-      #     npm run build
-
-      - name: 🔐 4. 配置 SSH 密钥与主机指纹授信
+      - name: 🔐 2. 配置 SSH 密钥与主机指纹授信
         run: |
           mkdir -p ~/.ssh
-          # 关键修复：使用 tr -d '\r' 清理可能存在的 Windows 换行符，避免 libcrypto 解析崩溃
           echo "${{ secrets.ECS_SSH_KEY }}" | tr -d '\r' > ~/.ssh/id_ed25519
           chmod 600 ~/.ssh/id_ed25519
-          # 自动获取 ECS SSH 指纹写入 known_hosts
           ssh-keyscan -p 22 -H ${{ secrets.ECS_HOST }} >> ~/.ssh/known_hosts
 
-      - name: ⚡ 5. 通过 Rsync 增量同步至 /var/www/zipperli.com/
+      # ─── 构建时拉取量化数据（形态4：key 只存在于 CI 内存，不进产物不进日志）───
+      - name: 📊 3. 拉取量化数据 → quant/data/
+        env:
+          QUANT_API_KEY: ${{ secrets.QUANT_API_KEY }}
         run: |
-          # 注意：如果你启用了上面的 npm run build，请将下方源目录 "./" 修改为打包产物目录如 "./dist/"
+          BASE="https://zipperli.com/api/quant"
+          mkdir -p quant/data
+          QUANT_OK=1
+          for M in us cn; do
+            curl -sf --max-time 30 -H "X-API-Key: ${QUANT_API_KEY}" \
+              "$BASE/reports?market=$M&limit=90" -o "quant/data/manifest-$M.json" || QUANT_OK=0
+            curl -sf --max-time 30 -H "X-API-Key: ${QUANT_API_KEY}" \
+              "$BASE/reports/latest?market=$M" -o "quant/data/report-$M-latest.json" || QUANT_OK=0
+            curl -sf --max-time 30 -H "X-API-Key: ${QUANT_API_KEY}" \
+              "$BASE/matrix/latest?market=$M" -o "quant/data/matrix-$M-latest.json" || QUANT_OK=0
+          done
+          # 全局基准盘（市场无关，全局一份；仪表盘头部数据源）
+          curl -sf --max-time 30 -H "X-API-Key: ${QUANT_API_KEY}" \
+            "$BASE/benchmarks" -o "quant/data/benchmarks.json" || QUANT_OK=0
+          # 按 manifest 逐日拉取历史报告正文（报告列表详情数据；单日失败仅跳过，不影响部署）
+          for M in us cn; do
+            for D in $(python3 -c "
+import json
+try:
+    m = json.load(open('quant/data/manifest-$M.json'))
+    print(' '.join(r['date'] for r in m['data']['reports']))
+except Exception:
+    pass
+"); do
+              [ -f "quant/data/report-$M-$D.json" ] || \
+              curl -sf --max-time 20 -H "X-API-Key: ${QUANT_API_KEY}" \
+                "$BASE/reports/$D?market=$M" -o "quant/data/report-$M-$D.json" \
+                || echo "::warning::report-$M-$D.json 拉取失败，该日期详情页将不可用"
+            done
+          done
+          # 校验产物是合法 JSON（防止把网关错误页当成数据存下来）
+          for f in quant/data/*.json; do
+            python3 -m json.tool "$f" > /dev/null || QUANT_OK=0
+          done
+          if [ "$QUANT_OK" != "1" ]; then
+            echo "QUANT_EXCLUDE=--exclude=quant/" >> "$GITHUB_ENV"
+            echo "::warning::量化数据拉取失败——本次部署保留服务器上的 quant/ 旧数据（宁旧勿无）"
+          else
+            echo "✅ 量化数据拉取成功："
+            ls -la quant/data/
+          fi
+
+      - name: ⚡ 4. 通过 Rsync 同步至 /var/www/zipperli.com/
+        run: |
+          # QUANT_EXCLUDE 正常为空：quant/（前端页面+刚生成的数据）随源目录同步，
+          # --delete 自动清理服务器上的过期文件（含退役的旧HTML报告页）。
+          # 数据拉取失败时其为 --exclude=quant/：保护服务器旧数据不被删空。
           rsync -avz --delete \
             --chmod=D755,F644 \
             --exclude='.git/' \
             --exclude='.github/' \
             --exclude='.gitignore' \
             --exclude='README.md' \
-            --exclude='quant/' \
             --exclude='node_modules/' \
+            $QUANT_EXCLUDE \
             -e "ssh -i ~/.ssh/id_ed25519 -p 22" \
             ./ ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }}:/var/www/zipperli.com/
 
-      - name: 🩺 6. 验证远端同步结果
+      - name: 🩺 5. 验证远端同步结果
         run: |
           ssh -i ~/.ssh/id_ed25519 -p 22 ${{ secrets.ECS_USER }}@${{ secrets.ECS_HOST }} << 'EOF'
-            echo "✅ 部署同步完成！/var/www/zipperli.com 当前文件列表："
+            echo "✅ 部署同步完成！当前文件列表："
             ls -lh /var/www/zipperli.com
+            echo "── quant/data ──"
+            ls -lh /var/www/zipperli.com/quant/data 2>/dev/null || echo "(quant/data 不存在)"
           EOF

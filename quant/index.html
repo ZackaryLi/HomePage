@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0b1019">
+    <title>量化日报 · ZipperLi</title>
+    <link rel="icon" type="image/png" href="../assets/img/favicon.png">
+    <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+    <a class="skip-link" href="#block-dashboard">跳转至市场概览</a>
+    <div class="quant-container">
+        <header class="site-header">
+            <a class="brand" href="./index.html" aria-label="ZipperLi 量化日报首页">
+                <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M5 17V11M12 17V5M19 17V8" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg></span>
+                <span>ZipperLi<span class="brand-divider">/</span><span class="brand-product">Quant</span></span>
+            </a>
+            <nav class="site-nav" aria-label="主导航">
+                <a href="#block-dashboard" class="nav-active">市场概览</a>
+                <a href="#block-reports">报告归档</a>
+                <a href="../" class="home-link">个人主页 <span aria-hidden="true">↗</span></a>
+            </nav>
+        </header>
+
+        <main id="main-content">
+            <section class="page-intro" aria-labelledby="page-title">
+                <div><p class="eyebrow">MARKET INTELLIGENCE</p><h1 id="page-title">洞察市场，<span>让数据说话。</span></h1><p class="intro-copy">全球基准 · 自选追踪 · 每日量化观察</p></div>
+                <div class="edition"><span class="edition-symbol" aria-hidden="true">Q<span>.</span></span><span>量化日报<span class="edition-small">DAILY MARKET BRIEF</span></span></div>
+            </section>
+
+            <section class="glass-card block" id="block-dashboard" aria-labelledby="dashboard-title">
+                <div class="dash-head">
+                    <div class="section-heading"><span class="section-index">01</span><div><h2 id="dashboard-title">市场概览</h2><p id="data-asof" class="data-asof" role="status">数据加载中…</p></div></div>
+                    <div class="market-tabs" role="group" aria-label="选择市场">
+                        <button type="button" class="tab-btn active" data-market="us" aria-pressed="true">美股 <span>US</span></button>
+                        <button type="button" class="tab-btn" data-market="cn" aria-pressed="false">A股 <span>CN</span></button>
+                    </div>
+                </div>
+                <div class="sub-head"><h3 class="sub-title">全局基准盘</h3><span class="section-caption">GLOBAL BENCHMARKS</span></div>
+                <div id="bench-cards"><div class="loading-state" role="status"><span class="loading-dot"></span>正在加载全球市场数据…</div></div>
+                <div class="sub-head asset-section-head"><h3 class="sub-title">自选池状态</h3><span class="section-caption">20 日涨跌幅 · 红涨绿跌</span></div>
+                <div id="asset-cards" class="asset-grid"><div class="loading-state" role="status"><span class="loading-dot"></span>正在加载自选池…</div></div>
+            </section>
+
+            <section class="glass-card block" id="block-reports" aria-labelledby="reports-title">
+                <div class="dash-head"><div class="section-heading"><span class="section-index">02</span><div><h2 id="reports-title">报告归档</h2><p class="section-description">回看每一天的市场切面</p></div></div><span class="section-caption">RESEARCH ARCHIVE</span></div>
+                <div class="tables-row">
+                    <div class="table-wrap"><div class="table-heading"><h3><span class="market-badge">US</span>美股市场</h3><span>每日观察</span></div><table class="report-table"><caption class="sr-only">美股历史报告</caption><thead><tr><th scope="col">报告日期</th><th scope="col">状态</th><th scope="col">阅读</th></tr></thead><tbody id="report-tbody-us"><tr><td colspan="3" class="table-empty">报告加载中…</td></tr></tbody></table></div>
+                    <div class="table-wrap"><div class="table-heading"><h3><span class="market-badge">CN</span>A股市场</h3><span>每日观察</span></div><table class="report-table"><caption class="sr-only">A股历史报告</caption><thead><tr><th scope="col">报告日期</th><th scope="col">状态</th><th scope="col">阅读</th></tr></thead><tbody id="report-tbody-cn"><tr><td colspan="3" class="table-empty">报告加载中…</td></tr></tbody></table></div>
+                </div>
+            </section>
+        </main>
+        <footer class="quant-footer"><div id="data-notes"></div><div class="footer-row"><p><span class="footer-brand">ZipperLi / Quant</span>系统自动生成，仅为客观状态描述，不构成投资建议。</p><a href="../">返回主页 <span aria-hidden="true">↗</span></a></div></footer>
+    </div>
+    <noscript><p class="noscript-note">请启用 JavaScript 以加载行情数据和报告。</p></noscript>
+    <script src="assets/marked.min.js"></script>
+    <script src="assets/app.js"></script>
+    <script src="assets/ui.js"></script>
+</body>
+</html>
