@@ -13,12 +13,12 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch: # 允许在 GitHub 网页端手动一键触发（数据兜底手段）
+  workflow_dispatch: # 主路径：ECS 在量化报告生成后（08:35/17:05）通过 API 即时触发，见 ECS /root/bin/dispatch-homepage.sh
   schedule:
+    # 兜底路径：ECS 触发失效时，GitHub schedule 仍会（迟滞数小时）更新数据。
+    # 注意 GitHub schedule 高负载时可能延迟 7~9 小时甚至丢弃——主力别依赖它。
     - cron: '35 0 * * 1-6'   # UTC → 北京时间 周一~六 08:35（周六拉的是周五收盘的美股报告）
-    - cron: '55 0 * * 1-6'   # 冗余重试：08:55（GitHub schedule 高负载会静默丢任务，双保险）
     - cron: '5 9 * * 1-5'    # UTC → 北京时间 周一~五 17:05
-    - cron: '25 9 * * 1-5'   # 冗余重试：17:25
 
 concurrency:
   group: deploy-production
